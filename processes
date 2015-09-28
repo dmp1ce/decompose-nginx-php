@@ -1,36 +1,38 @@
-DECOMPOSE_PROCESSES=( 'env' 'explore' 'dc' 'build' 'up')
+# Include common processes
+source $(_decompose-project-root)/.decompose/environment/lib/web/processes
+source $(_decompose-project-root)/.decompose/environment/lib/common/processes
+source $(_decompose-project-root)/.decompose/environment/lib/backup/processes
 
-_decompose-process-env() {
-  echo "$PROJECT_ENVIRONMENT"
-  echo "PRODUCTION: $PRODUCTION"
-  echo "DEVELOPMENT: $DEVELOPMENT"
-}
-_decompose-process-env_help() {
-  echo "  Show environment setting"
-}
-
-_decompose-process-explore() {
-  echo "Entering PHP container clone..."
-  echo "docker-compose -f $dc_config_file run --rm php /bin/bash"
-}
-_decompose-process-explore_help() {
-  echo "  Explore!"
-}
-
-_decompose-process-dc() {
-  echo 'docker-compose -f $dc_config_file "$@"'
-}
-_decompose-process-dc_help() {
-  echo "  Run docker compose in the current environment ($PROJECT_ENVIRONMENT)"
-}
+DECOMPOSE_PROCESSES=( 'build' 'up'
+  "${DECOMPOSE_WEB_PROCESSES[@]}" "${DECOMPOSE_COMMON_PROCESSES[@]}"
+  "${DECOMPOSE_BACKUP_PROCESSES[@]}" )
 
 _decompose-process-build() {
-  # TODO: Generate SSL certificates if they don't already exist.
-  #echo 'TODO: Generate SSL certs for testing'
-  # TODO: Rebuild source for production
-  # TODO: Build remaining docker-compose containers
+  echo "Building decompose templates..."
+  decompose-process-templates
 
-  decompose-process-templates 
+  echo "Creating version file..."
+  local project_root=$(_decompose-project-root)
+  local git_base_revision="`git -C $project_root describe --tags --match=v* --always --dirty 2>&1`"
+  # Set current base version
+  echo -e "$PROJECT_ENVIRONMENT\n$git_base_revision" > \
+    "$project_root"/"$PROJECT_VERSION_FILE"
+
+  # Pull the latest images
+  # Waiting for docker-compose fix:
+  # https://github.com/docker/compose/pull/1494
+  echo "Updating docker images..."
+  docker pull busybox
+  docker pull nginx
+  docker pull php:fpm
+  docker pull jwilder/nginx-proxy
+
+  # Remove 'source' container if this is production
+  echo "Rebuilding/recreating all containers..."
+  if [[ $PRODUCTION ]]; then
+    docker-compose rm -f source
+  fi
+
   docker-compose build
 }
 _decompose-process-build_help() {
@@ -38,7 +40,14 @@ _decompose-process-build_help() {
 }
 
 _decompose-process-up() {
-  docker-compose up -d
+  if [[ $PRODUCTION ]]; then
+    docker-compose up -d --force-recreate
+  else
+    docker-compose up -d
+  fi
+
+  # Restart nginx-proxy
+  _decompose-process-restart_nginx_proxy
 }
 _decompose-process-up_help() {
   echo "  Start project locally"
