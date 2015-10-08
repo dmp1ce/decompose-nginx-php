@@ -1,16 +1,11 @@
+# Include common elements
+source $(_decompose-project-root)/.decompose/environment/lib/web/elements
+
+ELEMENTS_POST_PROCESS=( "${ELEMENTS_WEB_POST_PROCESS[@]}" )
+
 PROJECT_ENVIRONMENT="development"
-PROJECT_PRODUCTION_SERVER="dev"
 
-PROJECT_NGINX_VIRTUAL_HOST_DEV="mysite.local"
-PROJECT_NGINX_VIRTUAL_HOST_PROD="mysite.local"
+PROJECT_NGINX_VIRTUAL_HOST="mysite.local"
+PROJECT_NGINX_VIRTUAL_HOST_ALTS="www.mysite.local"
 
-ELEMENTS_POST_PROCESS=( 'post' )
-
-_decompose-elements-post() {
-  if [ "$PROJECT_ENVIRONMENT" == "production" ]; then
-    export PRODUCTION=true; unset DEVELOPMENT
-  else
-    export DEVELOPMENT=true; unset PRODUCTION
-  fi
-}
 # vim:syntax=sh
