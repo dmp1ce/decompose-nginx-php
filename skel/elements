@@ -1,0 +1,17 @@
+# Constant elements
+# Don't put secrets here!
+# Put them in .decompose/elements where they won't get checked in.
+
+PROJECT_ENVIRONMENT="production"
+PROJECT_NGINX_VIRTUAL_HOST="mysite.com"
+PROJECT_NGINX_VIRTUAL_HOST_ALTS="www.mysite.com"
+
+# Backup config
+PROJECT_BACKUP_CONFIG_NAME=$PROJECT_NGINX_VIRTUAL_HOST
+PROJECT_BACKUP_INCLUDES=".decompose"
+PROJECT_BACKUP_EXCLUDES=".gitmodules"
+
+# Where to write current version information to
+PROJECT_VERSION_FILE="containers/source/http/version.txt"
+
+# vim:syntax=sh

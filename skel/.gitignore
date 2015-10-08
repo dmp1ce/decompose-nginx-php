@@ -1,1 +1,5 @@
-.decompose
+# Ignore generated template files
+docker-compose.yml
+
+# .decompose
+/.decompose/elements
