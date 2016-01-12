@@ -7,3 +7,6 @@
 [submodule "lib/web"]
 	path = lib/web
 	url = https://github.com/dmp1ce/decompose-web-common.git
+[submodule "lib/docker"]
+	path = lib/docker
+	url = https://github.com/dmp1ce/decompose-docker-common.git
