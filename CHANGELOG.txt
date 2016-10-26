@@ -1,0 +1,8 @@
+# Changelog
+
+PHP / nginx decompose environment
+
+## 1.0.0
+
+- Initial tracked release
+- Generate version.txt on build
